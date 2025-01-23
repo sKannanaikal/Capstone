@@ -30,6 +30,10 @@ def analyzeSample():
         algorithm = request.form.get('algorithm')
         filepath = f'./uploads/{malwareSample.filename}'
         malwareSample.save(filepath)
+
+        rankedList = FLEM_FRAMEWORK(filepath, model, algorithm)
+        print(rankedList)
+        
     return 'Success'
    
 @app.route("/results")

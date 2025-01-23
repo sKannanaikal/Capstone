@@ -136,7 +136,8 @@ class MalConvForSequenceClassification(nn.Module):
         return logits
 
 def dissassembleMalwareSample(file):
-    os.system('analyzeHeadless /home/stk5106/FLEMAPP/ FLEMSAMPLES -import ./uploads/malware.exe -analysiTimeoutPerFile "60" -loader "PeLoader" -processor "x86:LE:32:default" -overwrite -recursive -postScript "Disassembler.java" "$p_tmp_dis" "60" "30"')
+    command = '~/ghidra_11.2.1_PUBLIC/support/analyzeHeadless ~/FLEMAPP/ testProject -import ~/Capstone/uploads/malware.exe -analysisTimeoutPerFile 60 -loader PeLoader -processor x86:LE:32:default -scriptpath ~/ghidra_11.2.1_PUBLIC/ghidra_scripts/ -postscript Disassembler.java ~/Capstone/disassembled 60 30'
+    os.system(command)
 
 def generateFunctionMapping(file):
     fileMap = {}
@@ -299,4 +300,9 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
 
     maliciousFunctions = rankMaliciousFunctions(attributions, functionMapping)
 
+    systemCleanup()
+
     return maliciousFunctions
+
+def systemCleanup():
+    pass
