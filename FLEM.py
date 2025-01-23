@@ -1,3 +1,22 @@
+import os
+import torch
+from torch import nn, Tensor
+import torch.nn.functional as F
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+import torchvision
+import torchvision.transforms as transforms
+import pandas as pd
+from torch.nn.utils.rnn import pad_sequence
+import lief
+import pe_sections
+import numpy as np
+from captum.attr import KernelShap
+from captum.attr import Lime
+from captum.attr import LayerConductance
+from captum.attr import NeuronConductance
+
 GLOBAL_GPU = ''
 
 class MalConvConfig:
@@ -117,7 +136,7 @@ class MalConvForSequenceClassification(nn.Module):
         return logits
 
 def dissassembleMalwareSample(file):
-    pass
+    os.system('analyzeHeadless /home/stk5106/FLEMAPP/ FLEMSAMPLES -import ./uploads/malware.exe -analysiTimeoutPerFile "60" -loader "PeLoader" -processor "x86:LE:32:default" -overwrite -recursive -postScript "Disassembler.java" "$p_tmp_dis" "60" "30"')
 
 def generateFunctionMapping(file):
     fileMap = {}
