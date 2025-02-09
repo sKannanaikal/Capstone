@@ -12,6 +12,20 @@
 <body>
     <h1 class="centered">Results page</h1>
     <p class="centered">Congratulations! You can stop waiting.</p>
+    <h2>Ranked Malicous Functions</h2>
+    <nl>
+        {% for i in range(5) %}
+            <li>{{ rankedMaliciousFunctions[i] }}</li>
+        {% endfor %}
+    </nl>
+
+    <h2>Functions and attribution scores</h2>
+    <ul>
+        {% for i in range(sortedAttributions|length) %}
+            <li>{{ rankedMaliciousFunctions[i]  }} - {{ attributionsNP[0][sortedAttributions[i]] }}</li>
+        {% endfor %}
+    </ul>
+
 </body>
 
 </html>

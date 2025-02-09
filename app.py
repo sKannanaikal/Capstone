@@ -29,9 +29,9 @@ def loadingPage():
    
 @app.route("/results")
 def displayResults():  
-    rankedMaliciousFunctions = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
+    rankedMaliciousFunctions, sortedAttributions, attributionsNP = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
     
-    return render_template('results.html')
+    return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, attributionsNP=attributionsNP)
 
 if __name__ == '__main__':
     app.run()

@@ -175,15 +175,15 @@ def rankMaliciousFunctions(attributions, functionMapping):
     maliciousFunctions = []
 
     attributionsNP = attributions.detach().numpy()
-    meanAttributions = np.mean(np.abs(attributionsNP), axis=0)
+    meanAttributions = np.mean(attributionsNP, axis=0)
     sortedAttributions = np.argsort(meanAttributions)[::-1]
     
-    for i in range(5):
+    for i in range(len(sortedAttributions)):
         maliciousFunctionIndex = sortedAttributions[i]
         functionName = list(functionMapping.keys())[maliciousFunctionIndex]
         maliciousFunctions.append(functionName)
     
-    return maliciousFunctions
+    return maliciousFunctions, sortedAttributions, attributionsNP
 
 def extractFunctionsFromBinary(filepath, functionMapping):
     binaryFunctionBytes = b''
@@ -302,11 +302,11 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
     
     attributions = interpretation(vectorizedBinary, model, functionMapping, interpreteter)
 
-    maliciousFunctions = rankMaliciousFunctions(attributions, functionMapping)
+    maliciousFunctions, sortedAttributions, attributionsNP = rankMaliciousFunctions(attributions, functionMapping)
 
     systemCleanup()
 
-    return maliciousFunctions #redirect em to the other page now and gucci
+    return maliciousFunctions, sortedAttributions, attributionsNP
 
 def systemCleanup():
     pass
