@@ -3,19 +3,21 @@ import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
 import torch
+import warnings
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import torchvision
 import torchvision.transforms as transforms
 import pandas as pd
 from torch.nn.utils.rnn import pad_sequence
-import lief
-import pe_sections
 import numpy as np
 from captum.attr import KernelShap
 from captum.attr import Lime
 from captum.attr import LayerConductance
 from captum.attr import NeuronConductance
+import re
+import math
+
 
 GLOBAL_GPU = ''
 
@@ -136,13 +138,13 @@ class MalConvForSequenceClassification(nn.Module):
         return logits
 
 def dissassembleMalwareSample(file):
-    command = '~/ghidra_11.2.1_PUBLIC/support/analyzeHeadless ~/FLEMAPP/ testProject -import ~/Capstone/uploads/malware.exe -analysisTimeoutPerFile 60 -loader PeLoader -processor x86:LE:32:default -scriptpath ~/ghidra_11.2.1_PUBLIC/ghidra_scripts/ -postscript Disassembler.java ~/Capstone/disassembled 60 30'
+    command = '~/ghidra_11.2.1_PUBLIC/support/analyzeHeadless ~/FLEMAPP/ testProject -import ~/Capstone/uploads/malware.exe -analysisTimeoutPerFile 60 -loader PeLoader -processor x86:LE:32:default -scriptpath ~/ghidra_11.2.1_PUBLIC/ghidra_scripts/ -deleteproject -postscript Disassembler.java ~/Capstone/disassembled 60 30'
     os.system(command)
 
 def generateFunctionMapping(file):
     fileMap = {}
     
-    with open(f'../dissassembled/malware.asm', 'r') as dissassembly:
+    with open(f'/home/stk5106/Capstone/disassembled/malware.asm', 'r') as dissassembly:
         code = dissassembly.read()
 
     functions = code.split('\n\n')
@@ -183,7 +185,7 @@ def rankMaliciousFunctions(attributions, functionMapping):
     
     return maliciousFunctions
 
-def extractFunctionsFromBinary(file, functionMapping):
+def extractFunctionsFromBinary(filepath, functionMapping):
     binaryFunctionBytes = b''
     totalBytesExtracted = 0
     functionCount = 0
@@ -254,7 +256,7 @@ def interpretation(vectorizedBinary, model, functionMapping, interpreteter):
         if vectorizedBinary.dim() == 1:
             vectorizedBinary = vectorizedBinary.unsqueeze(0)
         with torch.no_grad():
-            logits = flem(vectorizedBinary)
+            logits = model(vectorizedBinary)
         
         probabilities = torch.softmax(logits, dim=-1)
         predictions = torch.argmax(probabilities, dim=-1)
@@ -286,15 +288,17 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
     GLOBAL_GPU = device
     
     configuration = MalConvConfig(num_labels=2, pad_token_id=257)
-    flem = MalConvForSequenceClassification(configuration)
-    flem.load_state_dict(torch.load(f'./models/{model_name}', weights_only=True))#TODO double check this lien after the entire file structure is finalized
-    flem.eval()
-    flem.to(GLOBAL_GPU)
+    model = MalConvForSequenceClassification(configuration)
+    model.load_state_dict(torch.load(f'./models/{model_name}', weights_only=True))#TODO double check this lien after the entire file structure is finalized
+    model.eval()
+    model.to(GLOBAL_GPU)
+    #TODO deploying pytorch models better
+    #TODO
 
     if algorithm_name == 'LIME':
-        interpreteter = Lime(flem)
+        interpreteter = Lime(model)
     elif algorithm_name == 'SHAP':
-        interpreteter = KernelShap(flem)
+        interpreteter = KernelShap(model)
     
     attributions = interpretation(vectorizedBinary, model, functionMapping, interpreteter)
 
@@ -302,7 +306,7 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
 
     systemCleanup()
 
-    return maliciousFunctions
+    return maliciousFunctions #redirect em to the other page now and gucci
 
 def systemCleanup():
     pass

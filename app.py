@@ -1,44 +1,37 @@
-import flem
-from flask import Flask, render_template, request
-
+from FLEM import FLEM_FRAMEWORK
+from flask import Flask, render_template, request, session
 
 app = Flask(__name__)
+app.secret_key = 'blah'
+
 
 @app.route("/")
 def homepage():
     return render_template("index.html")
 
-'''
-TODO General Pipeline
-(done) 1. User fills out form selects (malware sample to upload, explanation model, maybe XAI algorithm)
-2. then program will take and dissassemble uploads section malware sample and generate dissassembly file in dissassembled folder
-(done) 3. with the dissassembled file the function mapping is going to be generated as a dictionary
-4. then with the function mapping an interpretation will be done based on the users requested algorithms and a feature importance score ranked list for each function is given
-5. the user is then redirected somewhere else where they will be able to see the results (ranked list, document, IDK)
-
-Beauty standards
-- maybe a loading screeen or bar like pizza hut or something so the users know whats going on
-- introduce file upload security checks and all
-- be mindful of vulnerabilities, etc. and patch them
-'''
-
 @app.route("/upload", methods=['POST'])
-def analyzeSample():
+def loadingPage():
     if request.method == 'POST':
         malwareSample = request.files['sample']
         model = request.form.get('model')
         algorithm = request.form.get('algorithm')
-        filepath = f'./uploads/{malwareSample.filename}'
-        malwareSample.save(filepath)
-
-        rankedList = FLEM_FRAMEWORK(filepath, model, algorithm)
-        print(rankedList)
         
-    return 'Success'
+        filepath = f'./uploads/malware.exe'
+        malwareSample.save(filepath)
+        
+        session['model'] = model
+        session['algorithm'] = algorithm
+        session['filepath'] = filepath
+        
+        print(f'[+] User selected {filepath} with model: {model} and algorithm: {algorithm}')
+    
+    return render_template('loading.html')
    
 @app.route("/results")
-def displayResults():
-    return 'Results Page'
+def displayResults():  
+    rankedMaliciousFunctions = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
+    
+    return render_template('results.html')
 
 if __name__ == '__main__':
     app.run()
