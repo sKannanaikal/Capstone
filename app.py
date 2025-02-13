@@ -1,5 +1,6 @@
 from FLEM import FLEM_FRAMEWORK
 from flask import Flask, render_template, request, session
+from stats import genPieChart
 
 app = Flask(__name__)
 app.secret_key = 'blah'
@@ -30,7 +31,7 @@ def loadingPage():
 @app.route("/results")
 def displayResults():  
     rankedMaliciousFunctions, sortedAttributions, attributionsNP = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
-    
+    genPieChart(attributionsNP[0])
     return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, attributionsNP=attributionsNP)
 
 if __name__ == '__main__':

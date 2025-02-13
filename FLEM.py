@@ -18,8 +18,7 @@ from captum.attr import NeuronConductance
 import re
 import math
 
-
-GLOBAL_GPU = ''
+GLOBAL_DEVICE = ''
 
 class MalConvConfig:
     """
@@ -251,7 +250,7 @@ def generateFeatureMask(vectorizedBinary, functionMapping):
 
 def interpretation(vectorizedBinary, model, functionMapping, interpreteter):
     try:
-        vectorizedBinary = vectorizedBinary.to(GLOBAL_GPU)
+        vectorizedBinary = vectorizedBinary.to(GLOBAL_DEVICE)
         
         if vectorizedBinary.dim() == 1:
             vectorizedBinary = vectorizedBinary.unsqueeze(0)
@@ -261,11 +260,11 @@ def interpretation(vectorizedBinary, model, functionMapping, interpreteter):
         probabilities = torch.softmax(logits, dim=-1)
         predictions = torch.argmax(probabilities, dim=-1)
         
-        if(predictions == 0): #make sure this is malware?
+        if(predictions == 0): #TODO make sure this is malware?
             print('\t Model predicted correctly')
         
         featureMask = generateFeatureMask(vectorizedBinary,  functionMapping)
-        featureMask = featureMask.to(GLOBAL_GPU)
+        featureMask = featureMask.to(GLOBAL_DEVICE)
         
         attributions = interpreteter.attribute(vectorizedBinary, target=0, feature_mask=featureMask, return_input_shape=False)
     
@@ -275,7 +274,7 @@ def interpretation(vectorizedBinary, model, functionMapping, interpreteter):
     return attributions
 
 def FLEM_FRAMEWORK(file, model_name, algorithm_name):
-    global GLOBAL_GPU
+    global GLOBAL_DEVICE
     
     dissassembleMalwareSample(file)
 
@@ -284,16 +283,14 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
     vectorizedBinary = extractFunctionsFromBinary(file, functionMapping)
 
     warnings.filterwarnings("ignore")
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    GLOBAL_GPU = device
+    device = torch.device("cpu")
+    GLOBAL_DEVICE = device
     
     configuration = MalConvConfig(num_labels=2, pad_token_id=257)
     model = MalConvForSequenceClassification(configuration)
-    model.load_state_dict(torch.load(f'./models/{model_name}', weights_only=True))#TODO double check this lien after the entire file structure is finalized
+    model.load_state_dict(torch.load(f'./models/{model_name}', weights_only=True))
     model.eval()
-    model.to(GLOBAL_GPU)
-    #TODO deploying pytorch models better
-    #TODO
+    model.to(device)
 
     if algorithm_name == 'LIME':
         interpreteter = Lime(model)
@@ -304,9 +301,5 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
 
     maliciousFunctions, sortedAttributions, attributionsNP = rankMaliciousFunctions(attributions, functionMapping)
 
-    systemCleanup()
-
     return maliciousFunctions, sortedAttributions, attributionsNP
 
-def systemCleanup():
-    pass

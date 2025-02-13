@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='./css/styles.css') }}">
     <title>Results page</title>
 </head>
 
@@ -25,7 +25,7 @@
             <li>{{ rankedMaliciousFunctions[i]  }} - {{ attributionsNP[0][sortedAttributions[i]] }}</li>
         {% endfor %}
     </ul>
-
+    <img src="{{ url_for('static', filename='./images/pie_chart.png') }}">
 </body>
 
 </html>
