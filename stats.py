@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 def functionCount(attributionScores):
     maliciousCount = 0
@@ -19,4 +20,15 @@ def genPieChart(attributionScores):
     counts = functionCount(attributionScores)
     figure, axis = plt.subplots()
     axis.pie(counts, labels=labels, autopct='%1.1f%%')
-    plt.savefig("./static/images/pie_chart.png")
+    plt.savefig("./static/images/pie_chart.png") #increase image quality with dpi
+
+def genBarChart(topMaliciousFunctionNames, topMaliciousFunctionAttributions):
+    fig, ax = plt.subplots()
+    ax.barh(topMaliciousFunctionNames, topMaliciousFunctionAttributions, align='center')
+    ax.invert_yaxis()
+    plt.savefig("./static/images/bar_chart.png") #increase image quality with dpi
+
+def genHistogram(sortedMaliciousFunctionAttributions):
+    counts, bins = np.histogram(sortedMaliciousFunctionAttributions)
+    plt.stairs(counts, bins)
+    plt.savefig("./static/images/histogram.png") #increase image quality with dpi
