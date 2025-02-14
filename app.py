@@ -1,6 +1,6 @@
 from FLEM import FLEM_FRAMEWORK
 from flask import Flask, render_template, request, session
-from stats import genPieChart
+from stats import genPieChart, genBarChart, genHistogram
 
 app = Flask(__name__)
 app.secret_key = 'blah'
