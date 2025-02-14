@@ -23,11 +23,13 @@ def genPieChart(attributionScores):
     plt.savefig("./static/images/pie_chart.png") #increase image quality with dpi
 
 def genBarChart(topMaliciousFunctionNames, topMaliciousFunctionAttributions):
+    plt.clf()
     fig, ax = plt.subplots()
     ax.barh(topMaliciousFunctionNames, topMaliciousFunctionAttributions, align='center')
     ax.invert_yaxis()
     plt.savefig("./static/images/bar_chart.png") #increase image quality with dpi
 
 def genHistogram(sortedMaliciousFunctionAttributions):
+    plt.clf()
     plt.hist(sortedMaliciousFunctionAttributions, bins=10, edgecolor='black')
     plt.savefig("./static/images/histogram.png") #increase image quality with dpi
