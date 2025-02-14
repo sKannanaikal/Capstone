@@ -30,8 +30,12 @@ def loadingPage():
    
 @app.route("/results")
 def displayResults():  
+    #Maybe run the FLEM framework for multiple iterations and then take the average highest ranked stuff
     rankedMaliciousFunctions, sortedAttributions, attributionsNP = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
     genPieChart(attributionsNP[0])
+    sortedAttributionScores = [attributionsNP[0][sortedAttributions[i]] for i in range(len(sortedAttributions))]
+    genBarChart(rankedMaliciousFunctions[:10], sortedAttributionScores[:10])
+    genHistogram(sortedAttributionScores)
     return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, attributionsNP=attributionsNP)
 
 if __name__ == '__main__':
