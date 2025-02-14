@@ -31,4 +31,4 @@ def genBarChart(topMaliciousFunctionNames, topMaliciousFunctionAttributions):
 def genHistogram(sortedMaliciousFunctionAttributions):
     counts, bins = np.histogram(sortedMaliciousFunctionAttributions)
     plt.stairs(counts, bins)
-    plst.savefig("./static/images/histogram.png") #increase image quality with dpi
+    plt.savefig("./static/images/histogram.png") #increase image quality with dpi
