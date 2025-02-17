@@ -15,21 +15,12 @@ def functionCount(attributionScores):
     return [maliciousCount, benignCount, noCorrelationCount]
     
 
-def genPieChart(attributionScores):
-    labels = 'Malicious', 'Benign', 'No-Correlation'
-    counts = functionCount(attributionScores)
-    figure, axis = plt.subplots()
-    axis.pie(counts, labels=labels, autopct='%1.1f%%')
-    plt.savefig("./static/images/pie_chart.png") #increase image quality with dpi
-
-def genBarChart(topMaliciousFunctionNames, topMaliciousFunctionAttributions):
-    plt.clf()
-    fig, ax = plt.subplots()
-    ax.barh(topMaliciousFunctionNames, topMaliciousFunctionAttributions, align='center')
-    ax.invert_yaxis()
-    plt.savefig("./static/images/bar_chart.png") #increase image quality with dpi
+def normalizeData(data):
+    minMaxedData = (data - np.min(data)) / (np.max(data) - np.min(data))
+    normalizedData = minMaxedData / np.sum(minMaxedData)
+    return normalizeData
 
 def genHistogram(sortedMaliciousFunctionAttributions):
     plt.clf()
-    plt.hist(sortedMaliciousFunctionAttributions, bins=10, edgecolor='black')
+    plt.hist(sortedMaliciousFunctionAttributions, bins=20, edgecolor='black')
     plt.savefig("./static/images/histogram.png") #increase image quality with dpi
