@@ -1,6 +1,7 @@
 from FLEM import FLEM_FRAMEWORK
 from flask import Flask, render_template, request, session
-from stats import genPieChart, genBarChart, genHistogram, normalizeData
+from stats import genHistogram, normalizeData
+import numpy as np
 
 app = Flask(__name__)
 app.secret_key = 'blah'
@@ -35,7 +36,7 @@ def displayResults():
     sortedAttributionScores = [attributionsNP[0][sortedAttributions[i]] for i in range(len(sortedAttributions))]
     genHistogram(sortedAttributionScores)
     normalizedAttributions = normalizeAttributions(attributionsNP, sortedAttributions)
-    return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, attributionsNP=normalizeAttributions)
+    return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, normalizedAttributions=normalizedAttributions)
 
 def normalizeAttributions(attributions, sortedAttributions):
     positiveAttributionScores = [attributions[0][sortedAttributions[i]] for i in range(len(sortedAttributions)) if attributions[0][sortedAttributions[i]] > 0]
@@ -44,8 +45,8 @@ def normalizeAttributions(attributions, sortedAttributions):
     positiveNormalized = normalizeData(positiveAttributionScores)
     negativeNormalized = normalizeData(negativeAttributionScores)
 
-    return positiveNormalized + negativeAttributionScores
-
+    #return positiveNormalized + negativeNormalized
+    return  np.concatenate((positiveNormalized, negativeNormalized))
 
 if __name__ == '__main__':
     app.run()

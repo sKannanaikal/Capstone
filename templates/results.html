@@ -21,7 +21,7 @@
     <h2>Functions and attribution scores</h2>
     <ul>
         {% for i in range(sortedAttributions|length) %}
-            <li>{{ rankedMaliciousFunctions[i]  }} - {{ attributionsNP[0][sortedAttributions[i]] }}</li>
+            <li>{{ rankedMaliciousFunctions[i]  }} - {{ normalizedAttributions[i] }}</li>
         {% endfor %}
     </ul>
     <img src="{{ url_for('static', filename='./images/pie_chart.png') }}">
