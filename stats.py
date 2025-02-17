@@ -18,6 +18,9 @@ def functionCount(attributionScores):
 def normalizeData(data):
     minMaxedData = (data - np.min(data)) / (np.max(data) - np.min(data))
     normalizedData = minMaxedData / np.sum(minMaxedData)
+    for i in range(len(data)):
+        data[i] = round(data[i] * 100, 2)
+
     return normalizedData
 
 def genHistogram(sortedMaliciousFunctionAttributions):
