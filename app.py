@@ -36,7 +36,15 @@ def displayResults():
     sortedAttributionScores = [attributionsNP[0][sortedAttributions[i]] for i in range(len(sortedAttributions))]
     genHistogram(sortedAttributionScores)
     normalizedAttributions = normalizeAttributions(attributionsNP, sortedAttributions)
-    return render_template('results.html', rankedMaliciousFunctions=rankedMaliciousFunctions, sortedAttributions=sortedAttributions, normalizedAttributions=normalizedAttributions)
+
+    with open('./disassembled/malware.asm', 'r') as file:
+        malware_code = file.read()
+
+    return render_template('results.html', 
+                            rankedMaliciousFunctions=rankedMaliciousFunctions, 
+                            sortedAttributions=sortedAttributions, 
+                            normalizedAttributions=normalizedAttributions, 
+                            malware_code=malware_code)
 
 def normalizeAttributions(attributions, sortedAttributions):
     positiveAttributionScores = [attributions[0][sortedAttributions[i]] for i in range(len(sortedAttributions)) if attributions[0][sortedAttributions[i]] > 0]
@@ -46,7 +54,7 @@ def normalizeAttributions(attributions, sortedAttributions):
     negativeNormalized = normalizeData(negativeAttributionScores)
 
     #return positiveNormalized + negativeNormalized
-    return  np.concatenate((positiveNormalized, negativeNormalized))
+    return  np.concatenate((positiveNormalized, negativeNormalized)) #TODO multiply by 100 and round to 2 decimal places
 
 if __name__ == '__main__':
     app.run()
