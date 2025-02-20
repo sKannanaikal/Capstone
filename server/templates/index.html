@@ -2,10 +2,11 @@
 
 <html lang="en">
     <head>
+        <link href="../static/css/updatedStyles.css" rel="stylesheet">
         <title>FLEM</title>
     </head>
     <body>
-        <h1>FLEM</h1>
+        <h1 class="text-3xl font-bold underline">FLEM</h1>
         <form action="{{url_for('loadingPage')}}" method="POST" enctype="multipart/form-data">
             <input type="file" name="sample">
             <select id="model" name="model">

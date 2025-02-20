@@ -1,4 +1,4 @@
-from FLEM import FLEM_FRAMEWORK
+#from FLEM import FLEM_FRAMEWORK
 from flask import Flask, render_template, request, session
 from stats import genHistogram, normalizeData
 import numpy as np
@@ -27,10 +27,11 @@ def loadingPage():
         
         print(f'[+] User selected {filepath} with model: {model} and algorithm: {algorithm}')
     
-    return render_template('loading.html')
+    return {'Message': 'Received Files'}
    
 @app.route("/results")
 def displayResults():  
+    #TODO update this to send json to the frontend
     #Maybe run the FLEM framework for multiple iterations and then take the average highest ranked stuff
     rankedMaliciousFunctions, sortedAttributions, attributionsNP = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
     sortedAttributionScores = [attributionsNP[0][sortedAttributions[i]] for i in range(len(sortedAttributions))]
