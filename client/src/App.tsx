@@ -38,6 +38,15 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
 
 import { Input } from './components/ui/input'
 
@@ -76,72 +85,85 @@ export default function MyForm() {
   }
 
   return (
-    <><h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-    Function Level Explanations of Malware
-  </h1><Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
-        <FormField
-          control={form.control}
-          name="fileInput"
-          render={({ field: { value, onChange, ...fieldProps } }) => (
-            <FormItem>
-              <FormLabel>Malware Sample</FormLabel>
-              <FormControl>
-                <Input
-                  {...fieldProps}
-                  placeholder="Malware Sample"
-                  type="file"
-                  accept="image/*, application/pdf"
-                  onChange={(event) => onChange(event.target.files && event.target.files[0])} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="model"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Model</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="FLEM_FUNCTIONS_ONLY" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="flem_functions_only">FUNCTIONS_ONLY</SelectItem>
-                  <SelectItem value="flem_text_section">TEXT_SECTION</SelectItem>
-                  <SelectItem value="flem_whole_exe">WHOLE_EXE</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )} />
+    <>
+    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">Function Level Explanations of Malware</h1>
 
-        <FormField
-          control={form.control}
-          name="algorithm"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Algorithm</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="LIME" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="LIME">Lime</SelectItem>
-                  <SelectItem value="KERNEL SHAP">Kernel Shap</SelectItem>
-                </SelectContent>
-              </Select>
+    <Card>
+    <CardHeader>
+      <CardTitle>Card Title</CardTitle>
+      <CardDescription>Card Description</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-3xl mx-auto py-10">
+            <FormField
+              control={form.control}
+              name="fileInput"
+              render={({ field: { value, onChange, ...fieldProps } }) => (
+                <FormItem>
+                  <FormLabel>Malware Sample</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...fieldProps}
+                      placeholder="Malware Sample"
+                      type="file"
+                      accept="image/*, application/pdf"
+                      onChange={(event) => onChange(event.target.files && event.target.files[0])} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Model</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="FLEM_FUNCTIONS_ONLY" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="flem_functions_only">FUNCTIONS_ONLY</SelectItem>
+                      <SelectItem value="flem_text_section">TEXT_SECTION</SelectItem>
+                      <SelectItem value="flem_whole_exe">WHOLE_EXE</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
 
-              <FormMessage />
-            </FormItem>
-          )} />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form></>
+            <FormField
+              control={form.control}
+              name="algorithm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Algorithm</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="LIME" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="LIME">Lime</SelectItem>
+                      <SelectItem value="KERNEL SHAP">Kernel Shap</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <FormMessage />
+                </FormItem>
+              )} />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
+    </CardContent>
+    <CardFooter>
+      <p>Card Footer</p>
+    </CardFooter>
+  </Card>
+  </>
   )
 }
