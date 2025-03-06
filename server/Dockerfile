@@ -32,6 +32,7 @@ COPY ./environment.yml .
 
 RUN conda env create -f environment.yml
 
+
 #install ghidra and copy in ghidra scripts
 RUN apt-get update && apt-get install -y \
     openjdk-21-jdk \
@@ -45,6 +46,7 @@ RUN wget -q https://github.com/NationalSecurityAgency/ghidra/releases/download/G
 ENV GHIDRA_HOME=/server/ghidra_11.0_PUBLIC
 
 RUN mkdir ./ghidra_11.0_PUBLIC/ghidra_scripts
+RUN mkdir FLEMAPP
 
 COPY ./ghidraScripts/*  ./ghidra_11.0_PUBLIC/ghidra_scripts/
 
@@ -57,4 +59,5 @@ RUN mkdir uploads
 
 #start up flask server
 EXPOSE 5000
-CMD ["conda", "activate", "flem", "&&", "python3", "app.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "flem", "python3", "app.py"]
+

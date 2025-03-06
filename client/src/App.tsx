@@ -52,7 +52,7 @@ import { UploadCloud } from "lucide-react";
 import { Input } from './components/ui/input';
 
 const formSchema = z.object({
-  fileInput: z.string(),
+  fileInput: z.instanceof(File, { message: "A file must be uploaded" }),
   model: z.string(),
   algorithm: z.string()
 });
@@ -70,9 +70,7 @@ const FileUpload = ({ form }) => {
           <FormLabel>Malware Sample</FormLabel>
           <FormControl>
             <div
-              className={cn(
-                "border-2 border-dashed border-gray-500 p-6 rounded-lg flex flex-col items-center justify-center cursor-pointer"
-              )}
+              className="border-2 border-dashed border-gray-500 p-6 rounded-lg flex flex-col items-center justify-center cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <input
@@ -83,7 +81,7 @@ const FileUpload = ({ form }) => {
                   const selectedFile = event.target.files && event.target.files[0];
                   if (selectedFile) {
                     setFile(selectedFile);
-                    onChange(selectedFile);
+                    onChange(selectedFile); // Set the value to React Hook Form
                   }
                 }}
               />
@@ -91,7 +89,7 @@ const FileUpload = ({ form }) => {
               <p className="text-sm text-gray-300 font-semibold">
                 {file ? file.name : "Click to upload or drag and drop"}
               </p>
-              <p className="text-xs text-gray-500">SVG, PNG, JPG, or GIF</p>
+              <p className="text-xs text-gray-500">PE or EXE</p>
             </div>
           </FormControl>
           <FormMessage />
@@ -106,19 +104,43 @@ export default function MyForm() {
     resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(values: any) {
+  async function onSubmit(values: any) {
     try {
-      console.log(values);
+      // Make sure the file is included in the submission
+      const formData = new FormData();
+      formData.append('fileInput', values.fileInput); // Append the file
+      formData.append('model', values.model); // Append the model
+      formData.append('algorithm', values.algorithm); // Append the algorithm
+  
+      // Show toast with submitted values
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(values, null, 2)}</code>
         </pre>
       );
+      console.log(JSON.stringify(values, null, 2));
+  
+      // Send the FormData (not JSON) as the request body
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData, // Use formData here
+      });
+  
+      if (response.ok) {
+        console.log('Data submitted successfully!');
+        const data = await response.json();
+        console.log(data);
+      } else {
+        console.error('Error submitting data:', response.status);
+      }
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
     }
   }
+  
+  
+  
 
   const appStyle = {
     backgroundColor: '#f0f4f8', // Light gray background color

@@ -17,8 +17,10 @@ from captum.attr import LayerConductance
 from captum.attr import NeuronConductance
 import re
 import math
+import random
 
 GLOBAL_DEVICE = ''
+GLOBAL_SEED = 42
 
 class MalConvConfig:
     """
@@ -137,13 +139,14 @@ class MalConvForSequenceClassification(nn.Module):
         return logits
 
 def dissassembleMalwareSample(file):
-    command = '~/ghidra_11.2.1_PUBLIC/support/analyzeHeadless ~/FLEMAPP/ testProject -import ~/Capstone/uploads/malware.exe -analysisTimeoutPerFile 60 -loader PeLoader -processor x86:LE:32:default -scriptpath ~/ghidra_11.2.1_PUBLIC/ghidra_scripts/ -deleteproject -postscript Disassembler.java ~/Capstone/disassembled 60 30'
+
+    command = '/server/ghidra_11.0_PUBLIC/support/analyzeHeadless /server/FLEMAPP/ testProject -import /server/uploads/malware.exe -analysisTimeoutPerFile 60 -loader PeLoader -processor x86:LE:32:default -scriptpath /server/ghidra_11.0_PUBLIC/ghidra_scripts/ -deleteproject -postscript Disassembler.java /server/disassembled 60 30'
     os.system(command)
 
 def generateFunctionMapping(file):
     fileMap = {}
     
-    with open(f'/home/stk5106/Capstone/disassembled/malware.asm', 'r') as dissassembly:
+    with open(f'/server/disassembled/malware.asm', 'r') as dissassembly:
         code = dissassembly.read()
 
     functions = code.split('\n\n')
@@ -282,19 +285,27 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
 
     vectorizedBinary = extractFunctionsFromBinary(file, functionMapping)
 
+    #setting the seed
+    random.seed(GLOBAL_SEED)
+    np.random.seed(GLOBAL_SEED)
+    torch.manual_seed(GLOBAL_SEED)
+    torch.cuda.manual_seed_all(GLOBAL_SEED)
+
     warnings.filterwarnings("ignore")
     device = torch.device("cpu")
     GLOBAL_DEVICE = device
     
     configuration = MalConvConfig(num_labels=2, pad_token_id=257)
     model = MalConvForSequenceClassification(configuration)
-    model.load_state_dict(torch.load(f'./models/{model_name}', weights_only=True))
+    model.load_state_dict(torch.load(f'./models/{model_name}', weights_only=False, map_location=torch.device('cpu'))) #try weights_only=True
     model.eval()
     model.to(device)
 
+
+
     if algorithm_name == 'LIME':
         interpreteter = Lime(model)
-    elif algorithm_name == 'SHAP':
+    elif algorithm_name == 'KERNEL SHAP':
         interpreteter = KernelShap(model)
     
     attributions = interpretation(vectorizedBinary, model, functionMapping, interpreteter)

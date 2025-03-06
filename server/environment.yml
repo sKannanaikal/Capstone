@@ -6,6 +6,7 @@ channels:
   - nvidia
   - defaults
 dependencies:
+  - flask-cors
   - _libgcc_mutex=0.1=main
   - _openmp_mutex=5.1=1_gnu
   - asttokens=2.0.5=pyhd3eb1b0_0
