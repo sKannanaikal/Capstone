@@ -1,10 +1,14 @@
 # Capstone
 
+## Prerequisites
+
+You will need to install docker before hand for this to work
+
 ## Getting the Whole system running
 
 From home directory just run
 ```
-sudo docker-compose up --build
+sudo docker compose up --build
 ```
 
 ## For the capstone group
