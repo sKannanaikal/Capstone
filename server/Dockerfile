@@ -59,5 +59,5 @@ RUN mkdir uploads
 
 #start up flask server
 EXPOSE 5000
-CMD ["conda", "run", "--no-capture-output", "-n", "flem", "python3", "app.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "flem", "python3","-u", "app.py"]
 

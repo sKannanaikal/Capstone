@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import { googlecode } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from "recharts";
+import { extent, bin } from "d3-array";
 import {
     Table,
     TableBody,
@@ -37,39 +39,79 @@ import React from "react";
     const rankedMaliciousFunctions = data.rankedMaliciousFunctions;
     const sortedAttributionIndexes = data.sortedAttributionIndexes;
     const rawAttributionScores = data.rawAttributionScores;
+    const functionMapping = data.functionMapping;
+
+    const NUM_BINS = 25;
+   
+    const validScores = rawAttributionScores[0]
+  .flat() 
+  .map(Number) 
+  .filter((x) => !isNaN(x)); 
+
+  const [minScore, maxScore] = extent(validScores);
+
+  if (minScore === undefined || maxScore === undefined) {
+    console.error("No valid data for histogram.");
+    return [];
+  }
+  
+
+  const binGenerator = bin()
+  .domain([minScore, maxScore])
+  .thresholds(NUM_BINS); 
+
+    const bins = binGenerator(validScores);
+
+
+    console.log(bins)
+
+
+    let noCorrelation = 0;
+    let malicious = 0;
+    let benign = 0;
+
+    for (let index = 0; index < rawAttributionScores[0].length; index++) {
+      let score = parseFloat(rawAttributionScores[0][index]);
+
+      if(score == 0.0) {
+        noCorrelation += 1;
+      }
+      else if (score > 0.0) {
+        malicious += 1;
+      }
+
+      else {
+        benign += 1;
+      }
+      
+    }
 
     const topFive = [];
     for (let i = 0; i < 5; i++) {
-        topFive[i] = rankedMaliciousFunctions[sortedAttributionIndexes[i]];
+        topFive[i] = rankedMaliciousFunctions[i];
       } 
    
 
-    const chartData = [
-        { month: "January", desktop: 186, mobile: 80 },
-        { month: "February", desktop: 305, mobile: 200 },
-        { month: "March", desktop: 237, mobile: 120 },
-        { month: "April", desktop: 73, mobile: 190 },
-        { month: "May", desktop: 209, mobile: 130 },
-        { month: "June", desktop: 214, mobile: 140 },
-      ]
-
+      const chartData = bins.map((b) => ({
+        range: `${b.x0?.toFixed(2)} - ${b.x1?.toFixed(2)}`,
+        count: b.length ?? 0, 
+      }));
+      
       const pieChartData = [
-        { functionClass: "malicious", functions: 275, fill: "var(--color-malicious)" },
-        { functionClass: "benign", functions: 200, fill: "var(--color-benign)" },
-        { functionClass: "no_correlation", functions: 287, fill: "var(--color-no_correlation)" },
+        { functionClass: "malicious", functions: malicious, fill: "var(--color-malicious)" },
+        { functionClass: "benign", functions: benign, fill: "var(--color-benign)" },
+        { functionClass: "no_correlation", functions: noCorrelation, fill: "var(--color-no_correlation)" },
       ]
 
-      const totalFunctions = React.useMemo(() => {
-        return pieChartData.reduce((acc, curr) => acc + curr.functions, 0)
-      }, [])
+      const totalFunctions = malicious + noCorrelation + benign;
     
 
       const chartConfig = {
-        desktop: {
-          label: "Desktop",
+        count: {
+          label: "Attribution Scores",
           color: "#2563eb",
         },
-      } satisfies ChartConfig
+      } satisfies ChartConfig;
 
       const pieChartConfig = {
         functions: {
@@ -111,7 +153,7 @@ import React from "react";
         ))}
         </div>
 
-<div className="mt-[2vw]"> {/* Added margin-top for gap */}
+<div className="mt-[2vw]"> 
 
 <h2 className="text-3xl font-bold mb-6">Function Data Overview</h2>
 
@@ -127,21 +169,14 @@ import React from "react";
         </TableRow>
       </TableHeader>
       <TableBody>
-        {Array.from({ length: 20 }).map((_, i) => (
+        {Array.from({ length: rankedMaliciousFunctions.length }).map((_, i) => (
           <>
             <TableRow key={`row1-${i}`}>
-              <TableCell className="text-center text-xl">1</TableCell>
-              <TableCell className="text-center text-xl">FUN_001</TableCell>
-              <TableCell className="text-center text-xl">2.14</TableCell>
-              <TableCell className="text-center text-xl">50</TableCell>
-              <TableCell className="text-center text-xl">16 - 30</TableCell>
-            </TableRow>
-            <TableRow key={`row2-${i}`}>
-              <TableCell className="text-center text-xl">2</TableCell>
-              <TableCell className="text-center text-xl">FUN_002</TableCell>
-              <TableCell className="text-center text-xl">2.04</TableCell>
-              <TableCell className="text-center text-xl">40</TableCell>
-              <TableCell className="text-center text-xl">50 - 90</TableCell>
+              <TableCell className="text-center text-xl">{i + 1}</TableCell>
+              <TableCell className="text-center text-xl">{rankedMaliciousFunctions[i]}</TableCell>
+              <TableCell className="text-center text-xl">{normalizedAttributions[sortedAttributionIndexes[i]]*100}</TableCell>
+              <TableCell className="text-center text-xl">{parseInt(functionMapping[rankedMaliciousFunctions[i]][1], 16) - parseInt(functionMapping[rankedMaliciousFunctions[i]][0], 16)}</TableCell>
+              <TableCell className="text-center text-xl">({parseInt(functionMapping[rankedMaliciousFunctions[i]][0], 16)}, {parseInt(functionMapping[rankedMaliciousFunctions[i]][1], 16)})</TableCell>
             </TableRow>
           </>
         ))}
@@ -154,18 +189,65 @@ import React from "react";
 
 <div className="mt-[2vw] w-[90vw] flex">
 
-    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-      </BarChart>
-    </ChartContainer>
+<ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={chartData}>
+
+    <text 
+      x="50%" 
+      y="20" 
+      textAnchor="middle" 
+      dominantBaseline="hanging" 
+      fontSize="16" 
+      fontWeight="bold"
+    >
+      Attribution Score Distribution
+    </text>
+      <CartesianGrid strokeDasharray="3 3" />
+
+      <XAxis 
+    dataKey="range" 
+    angle={-30}
+    textAnchor="end"
+    interval={Math.ceil(chartData.length / 6)} 
+    tick={{ fontSize: 12 }}
+    height={50} 
+    padding={{ left: 10, right: 10 }} 
+    label={{ 
+      value: "Attribution Score Ranges", 
+      position: "insideBottom", 
+      dy: 30,
+      style: { fontSize: 14, fill: "#666" } 
+  }}
+/>
+
+      <YAxis 
+        label={{ value: "Number of Functions", angle: -90, position: "insideLeft", dy: -10 }}
+      />
+
+
+      <Tooltip formatter={(value, name) => [`${value} functions`, name]} />
+
+      <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+    </BarChart>
+  </ResponsiveContainer>
+</ChartContainer>
 
     <ChartContainer
           config={pieChartConfig}
-          //className="mx-auto aspect-square max-h-[250px]"
           className="min-h-[200px] w-full"
         >
           <PieChart>
+          <text 
+      x="50%" 
+      y="20" 
+      textAnchor="middle" 
+      dominantBaseline="hanging" 
+      fontSize="16" 
+      fontWeight="bold"
+    >
+      Function Categorization
+    </text>
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}

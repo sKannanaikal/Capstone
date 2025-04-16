@@ -82,7 +82,7 @@ const FileUpload = ({ form }) => {
                   const selectedFile = event.target.files && event.target.files[0];
                   if (selectedFile) {
                     setFile(selectedFile);
-                    onChange(selectedFile); // Set the value to React Hook Form
+                    onChange(selectedFile);
                   }
                 }}
               />
@@ -108,24 +108,19 @@ export default function MyForm() {
 
   async function onSubmit(values: any) {
     try {
-      // Make sure the file is included in the submission
       const formData = new FormData();
-      formData.append('fileInput', values.fileInput); // Append the file
-      formData.append('model', values.model); // Append the model
-      formData.append('algorithm', values.algorithm); // Append the algorithm
-  
-      // Show toast with submitted values
+      formData.append('fileInput', values.fileInput);
+      formData.append('model', values.model);
+      formData.append('algorithm', values.algorithm);
       toast(
         <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
           <code className="text-white">{JSON.stringify(values, null, 2)}</code>
         </pre>
       );
       console.log(JSON.stringify(values, null, 2));
-  
-      // Send the FormData (not JSON) as the request body
       const response = await fetch('/upload', {
         method: 'POST',
-        body: formData, // Use formData here
+        body: formData,
       });
   
       if (response.ok) {
@@ -146,31 +141,31 @@ export default function MyForm() {
   
 
   const appStyle = {
-    backgroundColor: '#f0f4f8', // Light gray background color
-    minHeight: '100vh', // Ensures the background covers the full height of the screen
-    display: 'flex', // Use flexbox for easy centering
-    flexDirection: 'column', // Vertical layout
-    justifyContent: 'center', // Center content vertically
-    alignItems: 'center', // Center content horizontally
+    backgroundColor: '#f0f4f8',
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: '20px',
   };
 
   const cardStyle = {
-    width: '100%', // Ensure the card takes 100% of the parent's width (75% of screen width)
-    backgroundColor: '#f7fafc', // Light gray background
+    width: '100%',
+    backgroundColor: '#f7fafc',
     borderRadius: '8px', 
     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
     padding: '20px',
   };
 
   const headerStyle = {
-    color: '#2d3748', // Dark gray for header text
+    color: '#2d3748',
     marginBottom: '20px',
   };
 
   const selectStyle = {
-    backgroundColor: '#edf2f7', // Light gray for select dropdown
-    borderColor: '#cbd5e0', // Subtle border color
+    backgroundColor: '#edf2f7',
+    borderColor: '#cbd5e0',
     borderRadius: '8px',
     padding: '8px 12px',
     width: '100%',
@@ -185,7 +180,7 @@ export default function MyForm() {
   };
 
   const buttonStyle = {
-    backgroundColor: '#3182ce', // Blue color for button
+    backgroundColor: '#3182ce',
     color: '#fff',
     padding: '12px 24px',
     borderRadius: '8px',
@@ -195,7 +190,7 @@ export default function MyForm() {
   };
 
   const buttonHoverStyle = {
-    backgroundColor: '#2b6cb0', // Darker blue on hover
+    backgroundColor: '#2b6cb0',
   };
 
   return (

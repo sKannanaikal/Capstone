@@ -20,7 +20,7 @@ import math
 import random
 
 GLOBAL_DEVICE = ''
-GLOBAL_SEED = 42
+GLOBAL_SEED = 222
 
 class MalConvConfig:
     """
@@ -176,12 +176,18 @@ def generateFunctionMapping(file):
 def rankMaliciousFunctions(attributions, functionMapping):
     maliciousFunctions = []
 
+    print(attributions)
     attributionsNP = attributions.detach().numpy()
+    print(attributionsNP)
     meanAttributions = np.mean(attributionsNP, axis=0)
+    print(meanAttributions)
     sortedAttributions = np.argsort(meanAttributions)[::-1]
+    print(sortedAttributions)
     
     for i in range(len(sortedAttributions)):
         maliciousFunctionIndex = sortedAttributions[i]
+        print(functionMapping)
+        print(functionMapping.keys())
         functionName = list(functionMapping.keys())[maliciousFunctionIndex]
         maliciousFunctions.append(functionName)
     
@@ -199,6 +205,7 @@ def extractFunctionsFromBinary(filepath, functionMapping):
             try:
                 startingAddress = int(functionMapping[function][0], 16)
                 endingAddress = int(functionMapping[function][1], 16)
+                print(f'{startingAddress} - {endingAddress}')
             except TypeError:
                 print('[-] Type Error Occurred')
                 return None
@@ -223,9 +230,9 @@ def extractFunctionsFromBinary(filepath, functionMapping):
             binaryFunctionBytes += functionBytes
             functionCount += 1
         
-        if functionCount <= 5:
-            print(f'[-] Function Count Less than 5: {filepath} {functionCount} functions')
-            return None
+        # if functionCount <= 5:
+        #     print(f'[-] Function Count Less than 5: {filepath} {functionCount} functions')
+        #     return None
         
     vectorizedBinary = torch.frombuffer(binaryFunctionBytes, dtype=torch.uint8)
     vectorizedBinary = vectorizedBinary.to(torch.int64)
@@ -263,14 +270,18 @@ def interpretation(vectorizedBinary, model, functionMapping, interpreteter):
         probabilities = torch.softmax(logits, dim=-1)
         predictions = torch.argmax(probabilities, dim=-1)
         
-        if(predictions == 0): #TODO make sure this is malware?
-            print('\t Model predicted correctly')
-        
-        featureMask = generateFeatureMask(vectorizedBinary,  functionMapping)
-        featureMask = featureMask.to(GLOBAL_DEVICE)
-        
-        attributions = interpreteter.attribute(vectorizedBinary, target=0, feature_mask=featureMask, return_input_shape=False)
-    
+        #if the item is indeed malware and the model predicted it to be malicious then go as is
+        if(predictions == 0):
+            featureMask = generateFeatureMask(vectorizedBinary,  functionMapping)
+            featureMask = featureMask.to(GLOBAL_DEVICE)
+            attributions = interpreteter.attribute(vectorizedBinary, target=0, feature_mask=featureMask, return_input_shape=False)
+        else:
+            #if however the item is malware and the model belives otherwise then all negative attributions are the most malicious
+            #basically do a reverse
+            featureMask = generateFeatureMask(vectorizedBinary, functionMapping)
+            featureMask = featureMask.to(GLOBAL_DEVICE)
+            attributions = -interpreteter.attribute(vectorizedBinary, target=0, feature_mask=featureMask, return_input_shape=False)
+
     except (ValueError, IndexError, torch.OutOfMemoryError):
         return None, None
     
@@ -301,8 +312,6 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
     model.eval()
     model.to(device)
 
-
-
     if algorithm_name == 'LIME':
         interpreteter = Lime(model)
     elif algorithm_name == 'KERNEL SHAP':
@@ -312,5 +321,5 @@ def FLEM_FRAMEWORK(file, model_name, algorithm_name):
 
     maliciousFunctions, sortedAttributions, attributionsNP = rankMaliciousFunctions(attributions, functionMapping)
 
-    return maliciousFunctions, sortedAttributions, attributionsNP
+    return maliciousFunctions, sortedAttributions, attributionsNP, functionMapping
 

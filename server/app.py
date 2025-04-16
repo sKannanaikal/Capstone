@@ -32,7 +32,7 @@ def loadingPage():
         
         print(f'[+] User selected {filepath} with model: {model} and algorithm: {algorithm}')
 
-        rankedMaliciousFunctions, sortedAttributions, attributionsNP = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
+        rankedMaliciousFunctions, sortedAttributions, attributionsNP, functionMapping = FLEM_FRAMEWORK(session['filepath'], session['model'], session['algorithm'])
         sortedAttributionScores = [attributionsNP[0][sortedAttributions[i]] for i in range(len(sortedAttributions))]
         normalizedAttributions = normalizeAttributions(attributionsNP, sortedAttributions)
 
@@ -43,7 +43,9 @@ def loadingPage():
         response['rankedMaliciousFunctions'] = rankedMaliciousFunctions
         response['sortedAttributionIndexes'] = sortedAttributions.tolist()
         response['normalizedAttributions'] = normalizedAttributions.tolist()
+        response['rawAttributionScores'] = attributionsNP.tolist()
         response['assemblyCode'] = malwareCode
+        response['functionMapping'] = functionMapping
 
         return jsonify(response)
 
@@ -61,4 +63,4 @@ def normalizeAttributions(attributions, sortedAttributions):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
